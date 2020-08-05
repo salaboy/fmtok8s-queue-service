@@ -40,6 +40,8 @@ public class QueueServiceApplication {
     @Value("${EVENTS_SINK:http://localhost:8080}")
     private String EVENT_SINK;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     private LinkedList<QueueSession> queue = new LinkedList<>();
 
     @PostConstruct
@@ -100,12 +102,13 @@ public class QueueServiceApplication {
     }
 
     @PostMapping(value = "/join", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String joinQueueForTicket(@RequestHeader Map<String, String> headers, @RequestBody QueueSession session) throws JsonProcessingException {
-
-        CloudEvent<AttributesImpl, String> cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, session);
+    public String joinQueueForTicket(@RequestHeader Map<String, String> headers, @RequestBody String event) throws JsonProcessingException {
+        log.info(event);
+        CloudEvent<AttributesImpl, String> cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
         if(!cloudEvent.getAttributes().getType().equals("Queue.CustomerJoined")){
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getAttributes().getType() );
         }
+        QueueSession session = objectMapper.readValue(cloudEvent.getData().get(), QueueSession.class);
         session.setClientId(UUID.randomUUID().toString());
         log.info("> New Customer in Queue: " + session);
         queue.add(session);
@@ -113,14 +116,14 @@ public class QueueServiceApplication {
     }
 
     @PostMapping(value = "/exit", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void exitQueue(@RequestHeader Map<String, String> headers, @RequestBody QueueSession session) {
-        log.info(session.toString());
-        CloudEvent<AttributesImpl, String> cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, session);
+    public void exitQueue(@RequestHeader Map<String, String> headers, @RequestBody String event) {
+        log.info(event);
+        CloudEvent<AttributesImpl, String> cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
         if(!cloudEvent.getAttributes().getType().equals("Queue.CustomerExited")){
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueExited' and got: " + cloudEvent.getAttributes().getType() );
         }
-        log.info("> Customer exited the Queue: " + session);
-        queue.remove(session);
+        log.info("> Customer exited the Queue: " + event);
+        queue.remove(event);
     }
 
 
