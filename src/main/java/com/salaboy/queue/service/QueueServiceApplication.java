@@ -109,9 +109,13 @@ public class QueueServiceApplication {
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getAttributes().getType() );
         }
         QueueSession session = objectMapper.readValue(cloudEvent.getData().get(), QueueSession.class);
-        session.setClientId(UUID.randomUUID().toString());
-        log.info("> New Customer in Queue: " + session);
-        queue.add(session);
+
+        if(!alreadyInQueue(session.getSessionId())) {
+            session.setClientId(UUID.randomUUID().toString());
+            log.info("> New Customer in Queue: " + session);
+
+            queue.add(session);
+        }
         return session.toString();
     }
 
@@ -144,6 +148,17 @@ public class QueueServiceApplication {
             }
         }
         return -1;
+    }
+
+    private boolean alreadyInQueue(String sessionId) {
+        Iterator<QueueSession> iterator = queue.iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().getSessionId().equals(sessionId)) {
+                return true;
+            }
+        }
+        return false;
+
     }
 
 
