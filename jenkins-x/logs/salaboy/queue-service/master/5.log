@@ -1,0 +1,202 @@
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mcredential-initializer[0m
+{"level":"info","ts":1596638821.7049782,"caller":"creds-init/main.go:44","msg":"Credentials initialized."}
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mworking-dir-initializer[0m
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mplace-tools[0m
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mstep-git-source-salaboy-queue-service-master-re-8dmbh-tpjhh[0m
+{"level":"info","ts":1596638831.905006,"caller":"git/git.go:105","msg":"Successfully cloned https://github.com/*******/queue-service.git @ v0.0.5 in path /workspace/source"}
+{"level":"warn","ts":1596638831.9084303,"caller":"git/git.go:152","msg":"Unexpected error: creating symlink: symlink /tekton/home/.ssh /root/.ssh: file exists"}
+{"level":"info","ts":1596638832.0201848,"caller":"git/git.go:133","msg":"Successfully initialized and updated submodules in path /workspace/source"}
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mstep-setup-builder-home[0m
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mstep-git-merge[0m
+Using SHAs from PULL_REFS=master:e239353950a171dc6bd3703a3e5eba61f3dc8f23
+WARNING: no SHAs to merge, falling back to initial cloned commit
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mstep-setup-jx-git-credentials[0m
+Generated Git credentials file /workspace/xdg_config/git/credentials
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mstep-build-mvn-deploy[0m
+Picked up _JAVA_OPTIONS: -XX:+UnlockExperimentalVMOptions -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Xms10m -Xmx192m
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< com.*******.queue:queue-service >-------------------
+[INFO] Building queue-service 0.0.5
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.1.0:clean (default-clean) @ queue-service ---
+[INFO] 
+[INFO] --- maven-resources-plugin:3.1.0:resources (default-resources) @ queue-service ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.1:compile (default-compile) @ queue-service ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 2 source files to /workspace/source/target/classes
+[INFO] 
+[INFO] --- maven-resources-plugin:3.1.0:testResources (default-testResources) @ queue-service ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /workspace/source/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.1:testCompile (default-testCompile) @ queue-service ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 1 source file to /workspace/source/target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.0.0-M1:test (default-test) @ queue-service ---
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.*******.queue.service.QueueServiceApplicationTests
+14:48:00.191 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating CacheAwareContextLoaderDelegate from class [org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate]
+14:48:00.218 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating BootstrapContext using constructor [public org.springframework.test.context.support.DefaultBootstrapContext(java.lang.Class,org.springframework.test.context.CacheAwareContextLoaderDelegate)]
+14:48:00.299 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating TestContextBootstrapper for test class [com.*******.queue.service.QueueServiceApplicationTests] from class [org.springframework.boot.test.context.SpringBootTestContextBootstrapper]
+14:48:00.352 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Neither @ContextConfiguration nor @ContextHierarchy found for test class [com.*******.queue.service.QueueServiceApplicationTests], using SpringBootContextLoader
+14:48:00.376 [main] DEBUG org.springframework.test.context.support.AbstractContextLoader - Did not detect default resource location for test class [com.*******.queue.service.QueueServiceApplicationTests]: class path resource [com/*******/queue/service/QueueServiceApplicationTests-context.xml] does not exist
+14:48:00.386 [main] DEBUG org.springframework.test.context.support.AbstractContextLoader - Did not detect default resource location for test class [com.*******.queue.service.QueueServiceApplicationTests]: class path resource [com/*******/queue/service/QueueServiceApplicationTestsContext.groovy] does not exist
+14:48:00.394 [main] INFO org.springframework.test.context.support.AbstractContextLoader - Could not detect default resource locations for test class [com.*******.queue.service.QueueServiceApplicationTests]: no resource found for suffixes {-context.xml, Context.groovy}.
+14:48:00.407 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.*******.queue.service.QueueServiceApplicationTests]: QueueServiceApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+14:48:00.597 [main] DEBUG org.springframework.test.context.support.ActiveProfilesUtils - Could not find an 'annotation declaring class' for annotation type [org.springframework.test.context.ActiveProfiles] and class [com.*******.queue.service.QueueServiceApplicationTests]
+14:48:00.857 [main] DEBUG org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider - Identified candidate component class: file [/workspace/source/target/classes/com/*******/queue/service/QueueServiceApplication.class]
+14:48:00.886 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.*******.queue.service.QueueServiceApplication for test class com.*******.queue.service.QueueServiceApplicationTests
+14:48:01.330 [main] DEBUG org.springframework.boot.test.context.SpringBootTestContextBootstrapper - @TestExecutionListeners is not present for class [com.*******.queue.service.QueueServiceApplicationTests]: using defaults.
+14:48:01.336 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener, org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener, org.springframework.test.context.event.EventPublishingTestExecutionListener]
+14:48:01.423 [main] DEBUG org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Skipping candidate TestExecutionListener [org.springframework.test.context.web.ServletTestExecutionListener] due to a missing dependency. Specify custom listener classes or make the default listener classes and their required dependencies available. Offending class: [javax/servlet/ServletContext]
+14:48:01.445 [main] DEBUG org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Skipping candidate TestExecutionListener [org.springframework.test.context.transaction.TransactionalTestExecutionListener] due to a missing dependency. Specify custom listener classes or make the default listener classes and their required dependencies available. Offending class: [org/springframework/transaction/TransactionDefinition]
+14:48:01.465 [main] DEBUG org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Skipping candidate TestExecutionListener [org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener] due to a missing dependency. Specify custom listener classes or make the default listener classes and their required dependencies available. Offending class: [org/springframework/transaction/interceptor/TransactionAttribute]
+14:48:01.476 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Using TestExecutionListeners: [org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@1338fb5, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener@42463763, org.springframework.boot.test.autoconfigure.SpringBootDependencyInjectionTestExecutionListener@59f63e24, org.springframework.test.context.support.DirtiesContextTestExecutionListener@61f05988, org.springframework.test.context.event.EventPublishingTestExecutionListener@7ca33c24, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener@fade1fc, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener@67c2e933, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener@41dd05a, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener@613a8ee1, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener@178213b]
+14:48:01.518 [main] DEBUG org.springframework.test.context.support.AbstractDirtiesContextTestExecutionListener - Before test class: context [DefaultTestContext@48d5f34e testClass = QueueServiceApplicationTests, testInstance = [null], testMethod = [null], testException = [null], mergedContextConfiguration = [ReactiveWebMergedContextConfiguration@fc258b1 testClass = QueueServiceApplicationTests, locations = '{}', classes = '{class com.*******.queue.service.QueueServiceApplication}', contextInitializerClasses = '[]', activeProfiles = '{}', propertySourceLocations = '{}', propertySourceProperties = '{org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true}', contextCustomizers = set[org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@1c9b0314, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@2d29b4ee, org.springframework.boot.test.mock.mockito.MockitoContextCustomizer@0, org.springframework.boot.test.web.client.TestRestTemplateContextCustomizer@4470fbd6, org.springframework.boot.test.web.reactive.server.WebTestClientContextCustomizer@24959ca4, org.springframework.boot.test.autoconfigure.properties.PropertyMappingContextCustomizer@0, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverContextCustomizerFactory$Customizer@68878f6d], contextLoader = 'org.springframework.boot.test.context.SpringBootContextLoader', parent = [null]], attributes = map[[empty]]], class annotated with @DirtiesContext [false] with mode [null].
+14:48:01.625 [main] DEBUG org.springframework.test.context.support.DependencyInjectionTestExecutionListener - Performing dependency injection for test context [[DefaultTestContext@48d5f34e testClass = QueueServiceApplicationTests, testInstance = com.*******.queue.service.QueueServiceApplicationTests@3724af13, testMethod = [null], testException = [null], mergedContextConfiguration = [ReactiveWebMergedContextConfiguration@fc258b1 testClass = QueueServiceApplicationTests, locations = '{}', classes = '{class com.*******.queue.service.QueueServiceApplication}', contextInitializerClasses = '[]', activeProfiles = '{}', propertySourceLocations = '{}', propertySourceProperties = '{org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true}', contextCustomizers = set[org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@1c9b0314, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@2d29b4ee, org.springframework.boot.test.mock.mockito.MockitoContextCustomizer@0, org.springframework.boot.test.web.client.TestRestTemplateContextCustomizer@4470fbd6, org.springframework.boot.test.web.reactive.server.WebTestClientContextCustomizer@24959ca4, org.springframework.boot.test.autoconfigure.properties.PropertyMappingContextCustomizer@0, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverContextCustomizerFactory$Customizer@68878f6d], contextLoader = 'org.springframework.boot.test.context.SpringBootContextLoader', parent = [null]], attributes = map[[empty]]]].
+14:48:01.739 [main] DEBUG org.springframework.test.context.support.TestPropertySourceUtils - Adding inlined properties to environment: {spring.jmx.enabled=false, org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true, server.port=-1}
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.2.6.RELEASE)
+
+2020-08-05 14:48:02.530  INFO 70 --- [           main] c.s.q.s.QueueServiceApplicationTests     : Starting QueueServiceApplicationTests on *******-queue-service-master-re-8dmbh-5-from-build-pack-s-m9vsf with PID 70 (started by root in /workspace/source)
+2020-08-05 14:48:02.537  INFO 70 --- [           main] c.s.q.s.QueueServiceApplicationTests     : No active profile set, falling back to default profiles: default
+2020-08-05 14:48:06.304  INFO 70 --- [           main] c.s.q.service.QueueServiceApplication    : > Queue Init!
+2020-08-05 14:48:06.322  INFO 70 --- [          queue] c.s.q.service.QueueServiceApplication    : The Queue is empty!
+2020-08-05 14:48:10.106  INFO 70 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+2020-08-05 14:48:12.390  INFO 70 --- [           main] c.s.q.s.QueueServiceApplicationTests     : Started QueueServiceApplicationTests in 10.614 seconds (JVM running for 14.922)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.546 s - in com.*******.queue.service.QueueServiceApplicationTests
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- maven-jar-plugin:3.1.2:jar (default-jar) @ queue-service ---
+[INFO] Building jar: /workspace/source/target/queue-service-0.0.5.jar
+[INFO] 
+[INFO] --- spring-boot-maven-plugin:2.2.6.RELEASE:repackage (repackage) @ queue-service ---
+[INFO] Replacing main artifact with repackaged archive
+[INFO] 
+[INFO] --- maven-install-plugin:2.5.2:install (default-install) @ queue-service ---
+[INFO] Installing /workspace/source/target/queue-service-0.0.5.jar to /home/jenkins/.mvnrepository/com/*******/queue/queue-service/0.0.5/queue-service-0.0.5.jar
+[INFO] Installing /workspace/source/pom.xml to /home/jenkins/.mvnrepository/com/*******/queue/queue-service/0.0.5/queue-service-0.0.5.pom
+[INFO] 
+[INFO] --- maven-deploy-plugin:2.8.2:deploy (default-deploy) @ queue-service ---
+[INFO] Using alternate deployment repository local-nexus::default::http://nexus/repository/maven-releases/
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:03 min
+[INFO] Finished at: 2020-08-05T14:48:25Z
+[INFO] ------------------------------------------------------------------------
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mstep-build-skaffold-version[0m
+v1.0.1
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mstep-build-container-build[0m
+E0805 14:48:28.933441       8 aws_credentials.go:77] while getting AWS credentials NoCredentialProviders: no valid providers in chain. Deprecated.
+	For verbose messaging see aws.Config.CredentialsChainVerboseErrors
+[36mINFO[0m[0001] Using dockerignore file: /workspace/source/.dockerignore 
+[36mINFO[0m[0001] Retrieving image manifest openjdk:11-jre-slim 
+E0805 14:48:29.381476       8 metadata.go:154] while reading 'google-dockercfg' metadata: http status code: 404 while fetching url http://metadata.google.internal./computeMetadata/v1/instance/attributes/google-dockercfg
+E0805 14:48:29.385528       8 metadata.go:166] while reading 'google-dockercfg-url' metadata: http status code: 404 while fetching url http://metadata.google.internal./computeMetadata/v1/instance/attributes/google-dockercfg-url
+[36mINFO[0m[0002] Retrieving image manifest openjdk:11-jre-slim 
+[36mINFO[0m[0003] Built cross stage deps: map[]                
+[36mINFO[0m[0003] Retrieving image manifest openjdk:11-jre-slim 
+[36mINFO[0m[0004] Retrieving image manifest openjdk:11-jre-slim 
+[36mINFO[0m[0005] Executing 0 build triggers                   
+[36mINFO[0m[0005] cmd: EXPOSE                                  
+[36mINFO[0m[0005] Adding exposed port: 8080/tcp                
+[36mINFO[0m[0005] Resolving srcs [pom.xml target/lib*]...      
+[36mINFO[0m[0005] Checking for cached layer gcr.io/camunda-researchanddevelopment/cache:c8130d78102abc611c9e490ef63b1a0572ebd460c980f0d440157f1fdbbe36c9... 
+[36mINFO[0m[0006] No cached layer found for cmd COPY pom.xml target/lib* /opt/lib/ 
+[36mINFO[0m[0006] Resolving srcs [target/*.jar]...             
+[36mINFO[0m[0006] Unpacking rootfs as cmd COPY pom.xml target/lib* /opt/lib/ requires it. 
+[36mINFO[0m[0011] ENV PORT 8080                                
+[36mINFO[0m[0011] No files changed in this command, skipping snapshotting. 
+[36mINFO[0m[0011] ENV CLASSPATH /opt/lib                       
+[36mINFO[0m[0011] No files changed in this command, skipping snapshotting. 
+[36mINFO[0m[0011] EXPOSE 8080                                  
+[36mINFO[0m[0011] cmd: EXPOSE                                  
+[36mINFO[0m[0011] Adding exposed port: 8080/tcp                
+[36mINFO[0m[0011] No files changed in this command, skipping snapshotting. 
+[36mINFO[0m[0011] Resolving srcs [pom.xml target/lib*]...      
+[36mINFO[0m[0011] COPY pom.xml target/lib* /opt/lib/           
+[36mINFO[0m[0011] Resolving srcs [pom.xml target/lib*]...      
+[36mINFO[0m[0011] Resolving 1 paths                            
+[36mINFO[0m[0011] Taking snapshot of files...                  
+[36mINFO[0m[0011] Resolving srcs [target/*.jar]...             
+[36mINFO[0m[0011] Pushing layer gcr.io/camunda-researchanddevelopment/cache:c8130d78102abc611c9e490ef63b1a0572ebd460c980f0d440157f1fdbbe36c9 to cache now 
+[36mINFO[0m[0011] COPY target/*.jar /opt/app.jar               
+[36mINFO[0m[0011] Resolving srcs [target/*.jar]...             
+[36mINFO[0m[0011] Resolving 1 paths                            
+[36mINFO[0m[0011] Taking snapshot of files...                  
+[36mINFO[0m[0012] WORKDIR /opt                                 
+[36mINFO[0m[0012] cmd: workdir                                 
+[36mINFO[0m[0012] Changed working directory to /opt            
+[36mINFO[0m[0012] No files changed in this command, skipping snapshotting. 
+[36mINFO[0m[0012] CMD ["java", "-jar", "app.jar"]              
+[36mINFO[0m[0012] No files changed in this command, skipping snapshotting. 
+[36mINFO[0m[0012] Pushing layer gcr.io/camunda-researchanddevelopment/cache:c9d285205232eb94525415be66204ccea1827762f5efc6c80866e00d6d56e8d9 to cache now 
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mstep-build-post-build[0m
+no CVE provider running in the current ** namespace so skip adding image to be analysed
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mstep-promote-changelog[0m
+Converted /workspace/source/charts/queue-service to an unshallow repository
+Generating change log from git ref 479876821fff96009349cf74c88eb79b23d1d12b => 95d5ec406877b55e743cde4632c11e2b10d2acc9
+Associating user ******* in users.jenkins.io with email *******@gmail.com to git GitProvider user with login *******-1 as emails match
+Adding label jenkins.io/git-github-userid=*******-1 to user ******* in users.jenkins.io
+Associating user ******* in users.jenkins.io with email *******@gmail.com to git GitProvider user with login *******-1 as emails match
+Adding label jenkins.io/git-github-userid=*******-1 to user ******* in users.jenkins.io
+Finding issues in commit messages using git format
+WARNING: No release found for *******/queue-service and tag v0.0.5 so creating a new release
+Updated the release information at https://github.com/*******/queue-service/releases/tag/v0.0.5
+generated: /workspace/source/charts/queue-service/templates/release.yaml
+Created Release queue-service-0-0-5 resource in namespace **
+Updating PipelineActivity *******-queue-service-master-5 with version 0.0.5
+Updated PipelineActivities *******-queue-service-master-5 with release notes URL: https://github.com/*******/queue-service/releases/tag/v0.0.5
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mstep-promote-helm-release[0m
+WARNING: No $CHART_REPOSITORY defined so using the default value of: http://jenkins-x-chartmuseum:8080
+Adding missing Helm repo: storage.googleapis.com https://storage.googleapis.com/chartmuseum.jenkins-x.io
+Successfully added Helm repository storage.googleapis.com.
+Adding missing Helm repo: jenkins-x-chartmuseum http://jenkins-x-chartmuseum:8080
+Successfully added Helm repository jenkins-x-chartmuseum.
+WARNING: No $CHART_REPOSITORY defined so using the default value of: http://jenkins-x-chartmuseum:8080
+Uploading chart file queue-service-0.0.5.tgz to http://jenkins-x-chartmuseum:8080/api/charts
+Received 201 response: {"saved":true}
+
+Showing logs for build [32msalaboy-queue-service-master-re-8dmbh-5[0m stage [32mfrom-build-pack[0m and container [32mstep-promote-jx-promote[0m
+WARNING: prow based install so skip waiting for the merge of Pull Requests to go green as currently there is an issue with gettingstatuses from the PR, see https://github.com/jenkins-x/**/issues/2410
+WARNING: No $CHART_REPOSITORY defined so using the default value of: http://jenkins-x-chartmuseum:8080
+Promoting app queue-service version 0.0.5 to namespace **-staging
+Created Pull Request: https://github.com/*******/environment-zeebe-helm-new-staging/pull/57
+Added label updatebot to Pull Request https://github.com/*******/environment-zeebe-helm-new-staging/pull/57
+got git provider status pending from PR https://github.com/*******/environment-zeebe-helm-new-staging/pull/57
+Pull Request https://github.com/*******/environment-zeebe-helm-new-staging/pull/57 is merged at sha 3e9f162cffd9c80d1d6087038faa7e5abcda1817
+Pull Request merged but we are not waiting for the update pipeline to complete!
