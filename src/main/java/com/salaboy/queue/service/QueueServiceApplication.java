@@ -37,12 +37,10 @@ public class QueueServiceApplication {
     @Value("${ZEEBE_CLOUD_EVENTS_ROUTER:http://localhost:8080}")
     private String ZEEBE_CLOUD_EVENTS_ROUTER;
 
-
     @Value("${EVENTS_SINK:http://localhost:8080}")
     private String EVENT_SINK;
 
     private LinkedList<QueueSession> queue = new LinkedList<>();
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
     public void initQueue() {
@@ -54,8 +52,6 @@ public class QueueServiceApplication {
                         QueueSession session = queue.pop();
                         log.info("You are next: " + session);
 
-
-//
                         CloudEventBuilder<String> cloudEventBuilder = CloudEventBuilder.<String>builder()
                                 .withId(UUID.randomUUID().toString())
                                 .withTime(ZonedDateTime.now())
@@ -104,33 +100,26 @@ public class QueueServiceApplication {
     }
 
     @PostMapping(value = "/join", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String joinQueueForTicket(@RequestHeader Map<String, String> headers, @RequestBody String body) throws JsonProcessingException {
-        log.info(body);
-        CloudEvent<AttributesImpl, String> cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, body);
+    public String joinQueueForTicket(@RequestHeader Map<String, String> headers, @RequestBody QueueSession session) throws JsonProcessingException {
+
+        CloudEvent<AttributesImpl, String> cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, session);
         if(!cloudEvent.getAttributes().getType().equals("Queue.CustomerJoined")){
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getAttributes().getType() );
         }
-        QueueSession session = objectMapper.readValue(cloudEvent.getData().get(), QueueSession.class);
-
         session.setClientId(UUID.randomUUID().toString());
         log.info("> New Customer in Queue: " + session);
-
         queue.add(session);
-
         return session.toString();
     }
 
     @PostMapping(value = "/exit", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void exitQueue(@RequestHeader Map<String, String> headers, @RequestBody String body) {
-        log.info(body);
-        CloudEvent<AttributesImpl, String> cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, body);
+    public void exitQueue(@RequestHeader Map<String, String> headers, @RequestBody QueueSession session) {
+        log.info(session.toString());
+        CloudEvent<AttributesImpl, String> cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, session);
         if(!cloudEvent.getAttributes().getType().equals("Queue.CustomerExited")){
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueExited' and got: " + cloudEvent.getAttributes().getType() );
         }
-        QueueSession session = Json.decodeValue(cloudEvent.getData().get(), QueueSession.class);
-
         log.info("> Customer exited the Queue: " + session);
-
         queue.remove(session);
     }
 
@@ -138,7 +127,6 @@ public class QueueServiceApplication {
     @GetMapping("/")
     public int getQueueSize() {
         return queue.size();
-
     }
 
     @GetMapping("/{id}")
@@ -151,9 +139,7 @@ public class QueueServiceApplication {
             }else{
                 return position;
             }
-
         }
-
         return -1;
     }
 
