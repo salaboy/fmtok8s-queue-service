@@ -10,13 +10,22 @@ import io.cloudevents.json.Json;
 import io.cloudevents.v03.AttributesImpl;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.WebSocketMessage;
+import org.springframework.web.reactive.socket.WebSocketSession;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,6 +33,8 @@ import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @SpringBootApplication
 @RestController
@@ -34,8 +45,11 @@ public class QueueServiceApplication {
         SpringApplication.run(QueueServiceApplication.class, args);
     }
 
-    @Value("${ZEEBE_CLOUD_EVENTS_ROUTER:http://localhost:8080}")
+    @Value("${ZEEBE_CLOUD_EVENTS_ROUTER:http://zeebe-cloud-events-router}")
     private String ZEEBE_CLOUD_EVENTS_ROUTER;
+
+    @Value("${FRONT_END:http://customer-waiting-room-app}")
+    private String FRONT_END;
 
     @Value("${EVENTS_SINK:http://localhost:8080}")
     private String EVENT_SINK;
@@ -58,8 +72,8 @@ public class QueueServiceApplication {
                                 .withId(UUID.randomUUID().toString())
                                 .withTime(ZonedDateTime.now())
                                 .withType("Queue.CustomerExited")
-                                .withSource(URI.create("tickets.service.default"))
-                                .withData("{\"tickets\" : " + 2 + "}")
+                                .withSource(URI.create("queue.service.default"))
+                                .withData("{\"sessionId\" : " + session.getSessionId() + "}")
                                 .withDatacontenttype("application/json")
                                 .withSubject(session.getSessionId());
 
@@ -78,7 +92,16 @@ public class QueueServiceApplication {
                                 .doOnSuccess(s -> System.out.println("Result -> " + s)).subscribe();
 
 
-                       log.info("Queue Size: " + queue.size());
+                        webClient = WebClient.builder().baseUrl(FRONT_END).filter(logRequest()).build();
+
+                        postCloudEvent = CloudEventsHelper.createPostCloudEvent(webClient, "/api/", zeebeCloudEvent);
+
+                        postCloudEvent.bodyToMono(String.class).doOnError(t -> t.printStackTrace())
+                                .doOnSuccess(s -> System.out.println("Result -> " + s)).subscribe();
+
+
+
+                        log.info("Queue Size: " + queue.size());
                     }else{
                         log.info("The Queue is empty!");
                     }
@@ -160,6 +183,7 @@ public class QueueServiceApplication {
         return false;
 
     }
+
 
 
 
