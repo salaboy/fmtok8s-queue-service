@@ -1,6 +1,7 @@
 package com.salaboy.queue.service;
 
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salaboy.cloudevents.helper.CloudEventsHelper;
 import io.cloudevents.CloudEvent;
@@ -132,7 +133,7 @@ public class QueueServiceApplication {
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getType());
         }
         log.info(">> " + new String(cloudEvent.getData()));
-
+        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         String doubleQuoted = objectMapper.writeValueAsString(new String(cloudEvent.getData()));
         log.info(">>>> " + doubleQuoted);
         QueueSession session = objectMapper.readValue(doubleQuoted, QueueSession.class);
