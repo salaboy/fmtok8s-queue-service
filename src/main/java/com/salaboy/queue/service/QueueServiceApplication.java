@@ -140,11 +140,11 @@ public class QueueServiceApplication {
     public String joinQueueForTicket(@RequestHeader HttpHeaders headers, @RequestBody Object event) throws IOException {
         log.info(event.toString());
         CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
+        logCloudEvent(cloudEvent);
         if(!cloudEvent.getType().equals("Queue.CustomerJoined")){
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getType() );
         }
         log.info(new String(cloudEvent.getData()));
-        log.info(objectMapper.readValue(new String(cloudEvent.getData()),String.class));
         QueueSession session = objectMapper.readValue(new String(cloudEvent.getData()), QueueSession.class);
 
         if(!alreadyInQueue(session.getSessionId())) {
@@ -160,6 +160,7 @@ public class QueueServiceApplication {
     public void exitQueue(@RequestHeader HttpHeaders headers, @RequestBody Object event) {
         log.info(event.toString());
         CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
+        logCloudEvent(cloudEvent);
         if(!cloudEvent.getType().equals("Queue.CustomerExited")){
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueExited' and got: " + cloudEvent.getType() );
         }
