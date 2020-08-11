@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
@@ -136,7 +137,7 @@ public class QueueServiceApplication {
     }
 
     @PostMapping(value = "/join")
-    public String joinQueueForTicket(@RequestHeader Map<String, String> headers, @RequestBody Object event) throws IOException {
+    public String joinQueueForTicket(@RequestHeader HttpHeaders headers, @RequestBody Object event) throws IOException {
         log.info(event.toString());
         CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
         if(!cloudEvent.getType().equals("Queue.CustomerJoined")){
@@ -154,7 +155,7 @@ public class QueueServiceApplication {
     }
 
     @PostMapping(value = "/exit", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void exitQueue(@RequestHeader Map<String, String> headers, @RequestBody Object event) {
+    public void exitQueue(@RequestHeader HttpHeaders headers, @RequestBody Object event) {
         log.info(event.toString());
         CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
         if(!cloudEvent.getType().equals("Queue.CustomerExited")){
