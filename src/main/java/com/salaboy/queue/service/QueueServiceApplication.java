@@ -1,13 +1,16 @@
 package com.salaboy.queue.service;
 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salaboy.cloudevents.helper.CloudEventsHelper;
 import io.cloudevents.CloudEvent;
-import io.cloudevents.v03.CloudEventBuilder;
+
+import io.cloudevents.core.builder.CloudEventBuilder;
+import io.cloudevents.core.provider.EventFormatProvider;
+import io.cloudevents.jackson.JsonFormat;
 import io.zeebe.cloudevents.*;
-import io.cloudevents.json.Json;
-import io.cloudevents.v03.AttributesImpl;
+
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,7 @@ import reactor.core.publisher.Mono;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -68,22 +72,21 @@ public class QueueServiceApplication {
                         QueueSession session = queue.pop();
                         log.info("You are next: " + session);
 
-                        CloudEventBuilder<String> cloudEventBuilder = CloudEventBuilder.<String>builder()
+                        CloudEventBuilder cloudEventBuilder = CloudEventBuilder.v03()
                                 .withId(UUID.randomUUID().toString())
                                 .withTime(ZonedDateTime.now())
                                 .withType("Queue.CustomerExited")
                                 .withSource(URI.create("queue.service.default"))
-                                .withData("{\"sessionId\" : " + "\"" + session.getSessionId() + "\"}")
-                                .withDatacontenttype("application/json")
+                                .withData(("{\"sessionId\" : " + "\"" + session.getSessionId() + "\"}").getBytes())
+                                .withDataContentType("application/json")
                                 .withSubject(session.getSessionId());
 
 
-                        CloudEvent<AttributesImpl, String> zeebeCloudEvent = ZeebeCloudEventsHelper
+                        CloudEvent zeebeCloudEvent = ZeebeCloudEventsHelper
                                 .buildZeebeCloudEvent(cloudEventBuilder)
                                 .withCorrelationKey(session.getSessionId()).build();
 
-                        String cloudEventJson = Json.encode(zeebeCloudEvent);
-                        log.info("Before sending Cloud Event: " + cloudEventJson);
+                        logCloudEvent(zeebeCloudEvent);
                         WebClient webClient = WebClient.builder().baseUrl(ZEEBE_CLOUD_EVENTS_ROUTER).filter(logRequest()).build();
 
                         WebClient.ResponseSpec postCloudEvent = CloudEventsHelper.createPostCloudEvent(webClient, "/message", zeebeCloudEvent);
@@ -115,6 +118,14 @@ public class QueueServiceApplication {
         }.start();
     }
 
+    private void logCloudEvent(CloudEvent cloudEvent) {
+        log.info("Cloud Event: " + EventFormatProvider
+                .getInstance()
+                .resolveFormat(JsonFormat.CONTENT_TYPE)
+                .serialize(cloudEvent));
+
+    }
+
 
     private static ExchangeFilterFunction logRequest() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
@@ -125,13 +136,13 @@ public class QueueServiceApplication {
     }
 
     @PostMapping(value = "/join")
-    public String joinQueueForTicket(@RequestHeader Map<String, String> headers, @RequestBody Object event) throws JsonProcessingException {
+    public String joinQueueForTicket(@RequestHeader Map<String, String> headers, @RequestBody Object event) throws IOException {
         log.info(event.toString());
-        CloudEvent<AttributesImpl, String> cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
-        if(!cloudEvent.getAttributes().getType().equals("Queue.CustomerJoined")){
-            throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getAttributes().getType() );
+        CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
+        if(!cloudEvent.getType().equals("Queue.CustomerJoined")){
+            throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getType() );
         }
-        QueueSession session = objectMapper.readValue(cloudEvent.getData().get(), QueueSession.class);
+        QueueSession session = objectMapper.readValue(cloudEvent.getData(), QueueSession.class);
 
         if(!alreadyInQueue(session.getSessionId())) {
             session.setClientId(UUID.randomUUID().toString());
@@ -145,9 +156,9 @@ public class QueueServiceApplication {
     @PostMapping(value = "/exit", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void exitQueue(@RequestHeader Map<String, String> headers, @RequestBody Object event) {
         log.info(event.toString());
-        CloudEvent<AttributesImpl, String> cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
-        if(!cloudEvent.getAttributes().getType().equals("Queue.CustomerExited")){
-            throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueExited' and got: " + cloudEvent.getAttributes().getType() );
+        CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
+        if(!cloudEvent.getType().equals("Queue.CustomerExited")){
+            throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueExited' and got: " + cloudEvent.getType() );
         }
         log.info("> Customer exited the Queue: " + event);
         queue.remove(event);
