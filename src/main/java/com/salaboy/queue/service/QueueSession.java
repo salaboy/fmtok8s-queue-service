@@ -33,7 +33,7 @@ public class QueueSession {
 
     @Override
     public String toString() {
-        return "TicketPurchaseSession{" +
+        return "QueueSession{" +
                 "sessionId='" + sessionId + '\'' +
                 ", clientId='" + clientId + '\'' +
                 '}';

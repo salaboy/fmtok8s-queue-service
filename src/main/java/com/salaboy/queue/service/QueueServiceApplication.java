@@ -91,9 +91,8 @@ public class QueueServiceApplication {
                                 .doOnSuccess(s -> System.out.println("Result -> " + s)).subscribe();
 
 
-
                         log.info("Queue Size: " + queue.size());
-                    }else{
+                    } else {
                         log.info("The Queue is empty!");
                     }
                     try {
@@ -129,14 +128,16 @@ public class QueueServiceApplication {
         log.info(event.toString());
         CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
         logCloudEvent(cloudEvent);
-        if(!cloudEvent.getType().equals("Queue.CustomerJoined")){
-            throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getType() );
+        if (!cloudEvent.getType().equals("Queue.CustomerJoined")) {
+            throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getType());
         }
-        log.info(new String(cloudEvent.getData()));
-        log.info(objectMapper.writeValueAsString(new String(cloudEvent.getData())));
-        QueueSession session = objectMapper.readValue(objectMapper.writeValueAsString(new String(cloudEvent.getData())), QueueSession.class);
+        log.info(">> " + new String(cloudEvent.getData()));
 
-        if(!alreadyInQueue(session.getSessionId())) {
+        String doubleQuoted = objectMapper.writeValueAsString(new String(cloudEvent.getData()));
+        log.info(">>>> " + doubleQuoted);
+        QueueSession session = objectMapper.readValue(doubleQuoted, QueueSession.class);
+
+        if (!alreadyInQueue(session.getSessionId())) {
             session.setClientId(UUID.randomUUID().toString());
             log.info("> New Customer in Queue: " + session);
 
@@ -150,8 +151,8 @@ public class QueueServiceApplication {
         log.info(event.toString());
         CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
         logCloudEvent(cloudEvent);
-        if(!cloudEvent.getType().equals("Queue.CustomerExited")){
-            throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueExited' and got: " + cloudEvent.getType() );
+        if (!cloudEvent.getType().equals("Queue.CustomerExited")) {
+            throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueExited' and got: " + cloudEvent.getType());
         }
         log.info("> Customer exited the Queue: " + event);
         queue.remove(event);
@@ -167,10 +168,10 @@ public class QueueServiceApplication {
     public int getMyPositionInQueue(@PathVariable("id") String sessionId) {
         Iterator<QueueSession> iterator = queue.iterator();
         int position = 0;
-        while(iterator.hasNext()){
-            if(!iterator.next().getSessionId().equals(sessionId)){
+        while (iterator.hasNext()) {
+            if (!iterator.next().getSessionId().equals(sessionId)) {
                 position++;
-            }else{
+            } else {
                 return position;
             }
         }
@@ -187,8 +188,6 @@ public class QueueServiceApplication {
         return false;
 
     }
-
-
 
 
 }
