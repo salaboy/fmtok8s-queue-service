@@ -1,45 +1,32 @@
 package com.salaboy.queue.service;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salaboy.cloudevents.helper.CloudEventsHelper;
 import io.cloudevents.CloudEvent;
-
 import io.cloudevents.core.builder.CloudEventBuilder;
+import io.cloudevents.core.format.EventFormat;
 import io.cloudevents.core.provider.EventFormatProvider;
 import io.cloudevents.jackson.JsonFormat;
-import io.zeebe.cloudevents.*;
-
-
-
-import org.springframework.beans.factory.annotation.Autowired;
+import io.zeebe.cloudevents.ZeebeCloudEventsHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.reactive.socket.WebSocketHandler;
-import org.springframework.web.reactive.socket.WebSocketMessage;
-import org.springframework.web.reactive.socket.WebSocketSession;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URI;
 import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.UUID;
 
 @SpringBootApplication
 @RestController
@@ -120,10 +107,11 @@ public class QueueServiceApplication {
     }
 
     private void logCloudEvent(CloudEvent cloudEvent) {
-        log.info("Cloud Event: " + EventFormatProvider
+        EventFormat format = EventFormatProvider
                 .getInstance()
-                .resolveFormat(JsonFormat.CONTENT_TYPE)
-                .serialize(cloudEvent));
+                .resolveFormat(JsonFormat.CONTENT_TYPE);
+
+        log.info("Cloud Event: " + new String(format.serialize(cloudEvent)));
 
     }
 
@@ -145,7 +133,8 @@ public class QueueServiceApplication {
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getType() );
         }
         log.info(new String(cloudEvent.getData()));
-        QueueSession session = objectMapper.readValue(new String(cloudEvent.getData()), QueueSession.class);
+        log.info(objectMapper.writeValueAsString(new String(cloudEvent.getData())));
+        QueueSession session = objectMapper.readValue(objectMapper.writeValueAsString(new String(cloudEvent.getData())), QueueSession.class);
 
         if(!alreadyInQueue(session.getSessionId())) {
             session.setClientId(UUID.randomUUID().toString());
