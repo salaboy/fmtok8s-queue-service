@@ -165,6 +165,24 @@ public class QueueServiceApplication {
         queue.remove(event);
     }
 
+    @PostMapping(value = "/abandon", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void abandonQueue(@RequestHeader HttpHeaders headers, @RequestBody Object event) throws JsonProcessingException {
+
+        CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
+        logCloudEvent(cloudEvent);
+        if (!cloudEvent.getType().equals("Queue.CustomerAbandoned")) {
+            throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Queue.CustomerAbandoned' and got: " + cloudEvent.getType());
+        }
+        log.info("> Customer abandoned the Queue: " + event);
+        QueueSession session = objectMapper.readValue(new String(cloudEvent.getData()), QueueSession.class);
+        if(session != null && queue.contains(session)) {
+            queue.remove(session);
+            log.info("Session Removed: " + session.getSessionId());
+        }else{
+            log.info("Session not removed: " +session);
+        }
+    }
+
 
     @GetMapping("/")
     public int getQueueSize() {
