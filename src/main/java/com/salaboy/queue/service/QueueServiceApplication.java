@@ -41,7 +41,7 @@ public class QueueServiceApplication {
     @Value("${ZEEBE_CLOUD_EVENTS_ROUTER:http://zeebe-cloud-events-router}")
     private String ZEEBE_CLOUD_EVENTS_ROUTER;
 
-    @Value("${FRONT_END:http://customer-waiting-room-app}")
+    @Value("${FRONT_END:http://customer-waiting-room-app.default.svc.cluster.local}")
     private String FRONT_END;
 
     @Value("${EVENTS_SINK:http://localhost:8080}")
@@ -71,9 +71,12 @@ public class QueueServiceApplication {
                                 .withSubject(session.getSessionId());
 
 
+
                         CloudEvent zeebeCloudEvent = ZeebeCloudEventsHelper
                                 .buildZeebeCloudEvent(cloudEventBuilder)
                                 .withCorrelationKey(session.getSessionId()).build();
+
+
 
                         logCloudEvent(zeebeCloudEvent);
                         WebClient webClient = WebClient.builder().baseUrl(ZEEBE_CLOUD_EVENTS_ROUTER).filter(logRequest()).build();
@@ -132,10 +135,6 @@ public class QueueServiceApplication {
         if (!cloudEvent.getType().equals("Queue.CustomerJoined")) {
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getType());
         }
-        log.info(">> " + new String(cloudEvent.getData()));
-
-        String doubleQuoted = objectMapper.writeValueAsString(new String(cloudEvent.getData()));
-        log.info(">>>> " + doubleQuoted);
         QueueSession session = objectMapper.readValue(new String(cloudEvent.getData()), QueueSession.class);
 
         if (!alreadyInQueue(session.getSessionId())) {
