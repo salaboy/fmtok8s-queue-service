@@ -1,6 +1,7 @@
 package com.salaboy.queue.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salaboy.cloudevents.helper.CloudEventsHelper;
@@ -60,13 +61,20 @@ public class QueueServiceApplication {
                     if (!queue.isEmpty()) {
                         QueueSession session = queue.pop();
                         log.info("You are next: " + session);
-
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        String data = "";
+                        try {
+                            data = objectMapper.writeValueAsString("{ \"sessionId\" : \"" + session.getSessionId() + "\" }");
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
+                        log.info("Data going into the Cloud Event Builder ");
                         CloudEventBuilder cloudEventBuilder = CloudEventBuilder.v03()
                                 .withId(UUID.randomUUID().toString())
                                 .withTime(ZonedDateTime.now())
                                 .withType("Queue.CustomerExited")
                                 .withSource(URI.create("queue-service.default.svc.cluster.local"))
-                                .withData(("{ \"sessionId\" : \"" + session.getSessionId() + "\" }").getBytes())
+                                .withData(data.getBytes())
                                 .withDataContentType("application/json")
                                 .withSubject(session.getSessionId());
 
