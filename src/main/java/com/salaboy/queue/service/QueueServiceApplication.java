@@ -139,7 +139,6 @@ public class QueueServiceApplication {
         QueueSession session = objectMapper.readValue(doubleQuoted, QueueSession.class);
 
         if (!alreadyInQueue(session.getSessionId())) {
-            session.setClientId(UUID.randomUUID().toString());
             log.info("> New Customer in Queue: " + session);
 
             queue.add(session);

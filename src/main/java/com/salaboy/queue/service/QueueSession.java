@@ -1,18 +1,14 @@
 package com.salaboy.queue.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class QueueSession {
     private String sessionId;
-    private String clientId;
 
     public QueueSession() {
-    }
-
-    public QueueSession(String sessionId, String clientId) {
-        this.sessionId = sessionId;
-        this.clientId = clientId;
     }
 
     public String getSessionId() {
@@ -23,19 +19,11 @@ public class QueueSession {
         this.sessionId = sessionId;
     }
 
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
 
     @Override
     public String toString() {
         return "QueueSession{" +
                 "sessionId='" + sessionId + '\'' +
-                ", clientId='" + clientId + '\'' +
                 '}';
     }
 }
