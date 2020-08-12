@@ -66,7 +66,7 @@ public class QueueServiceApplication {
                                 .withTime(ZonedDateTime.now())
                                 .withType("Queue.CustomerExited")
                                 .withSource(URI.create("queue.service.default"))
-                                .withData(("{\"sessionId\" : " + "\"" + session.getSessionId() + "\"}").getBytes())
+                                .withData(("\"{\"sessionId\" : " + "\"" + session.getSessionId() + "\"}\"").getBytes())
                                 .withDataContentType("application/json")
                                 .withSubject(session.getSessionId());
 
