@@ -172,17 +172,17 @@ public class QueueServiceApplication {
     }
 
     @GetMapping("/{id}")
-    public String getMyPositionInQueue(@PathVariable("id") String sessionId) {
+    public QueuePosition getMyPositionInQueue(@PathVariable("id") String sessionId) {
         Iterator<QueueSession> iterator = queue.iterator();
         int position = 0;
         while (iterator.hasNext()) {
             if (!iterator.next().getSessionId().equals(sessionId)) {
                 position++;
             } else {
-                return position + "/" + queue.size();
+                return new QueuePosition(position, queue.size(), position * 2);
             }
         }
-        return "-1/"+queue.size();
+        return new QueuePosition(-1, queue.size(), -1);
     }
 
     private boolean alreadyInQueue(String sessionId) {
