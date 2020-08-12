@@ -65,8 +65,8 @@ public class QueueServiceApplication {
                                 .withId(UUID.randomUUID().toString())
                                 .withTime(ZonedDateTime.now())
                                 .withType("Queue.CustomerExited")
-                                .withSource(URI.create("queue.service.default"))
-                                .withData(("\"{\"sessionId\" : " + "\"" + session.getSessionId() + "\"}\"").getBytes())
+                                .withSource(URI.create("queue-service.default.svc.cluster.local"))
+                                .withData(("{ \"sessionId\" : \"" + session.getSessionId() + "\" }").getBytes())
                                 .withDataContentType("application/json")
                                 .withSubject(session.getSessionId());
 
