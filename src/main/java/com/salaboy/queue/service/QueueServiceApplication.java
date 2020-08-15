@@ -166,7 +166,6 @@ public class QueueServiceApplication {
         }else{
             log.info("Session not removed: " +session);
         }
-        // I should emit a CE to the router with the Queue.CustomerAbandoned type to produce an error in the flow to clean up the instance. 
 
     }
 
@@ -189,7 +188,7 @@ public class QueueServiceApplication {
                 return new QueuePosition(position, queue.size(), position * 2);
             }
         }
-        return new QueuePosition(-1, queue.size(), -1);
+        return new QueuePosition(-1, queue.size(), queue.size() * 2);
     }
 
     private boolean alreadyInQueue(String sessionId) {
