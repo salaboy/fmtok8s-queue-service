@@ -2,7 +2,6 @@ package com.salaboy.queue.service;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salaboy.cloudevents.helper.CloudEventsHelper;
 import io.cloudevents.CloudEvent;
@@ -28,6 +27,7 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 @SpringBootApplication
@@ -45,8 +45,6 @@ public class QueueServiceApplication {
     @Value("${FRONT_END:http://customer-waiting-room-app.default.svc.cluster.local}")
     private String FRONT_END;
 
-    @Value("${EVENTS_SINK:http://localhost:8080}")
-    private String EVENT_SINK;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -61,7 +59,6 @@ public class QueueServiceApplication {
                     if (!queue.isEmpty()) {
                         QueueSession session = queue.pop();
                         log.info("You are next: " + session);
-                        ObjectMapper objectMapper = new ObjectMapper();
                         String data = "";
                         try {
                             data = objectMapper.writeValueAsString("{ \"sessionId\" : \"" + session.getSessionId() + "\" }");
@@ -137,7 +134,6 @@ public class QueueServiceApplication {
 
     @PostMapping(value = "/join")
     public String joinQueueForTicket(@RequestHeader HttpHeaders headers, @RequestBody Object event) throws IOException {
-        log.info(event.toString());
         CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
         logCloudEvent(cloudEvent);
         if (!cloudEvent.getType().equals("Queue.CustomerJoined")) {
@@ -153,21 +149,10 @@ public class QueueServiceApplication {
         return session.toString();
     }
 
-    @PostMapping(value = "/exit", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void exitQueue(@RequestHeader HttpHeaders headers, @RequestBody Object event) {
-        log.info(event.toString());
-        CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
-        logCloudEvent(cloudEvent);
-        if (!cloudEvent.getType().equals("Queue.CustomerExited")) {
-            throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueExited' and got: " + cloudEvent.getType());
-        }
-        log.info("> Customer exited the Queue: " + event);
-        queue.remove(event);
-    }
 
-    @PostMapping(value = "/abandon", consumes = MediaType.APPLICATION_JSON_VALUE)
+
+    @PostMapping(value = "/abandon")
     public void abandonQueue(@RequestHeader HttpHeaders headers, @RequestBody Object event) throws JsonProcessingException {
-
         CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
         logCloudEvent(cloudEvent);
         if (!cloudEvent.getType().equals("Queue.CustomerAbandoned")) {
@@ -181,12 +166,16 @@ public class QueueServiceApplication {
         }else{
             log.info("Session not removed: " +session);
         }
+        // I should emit a CE to the router with the Queue.CustomerAbandoned type to produce an error in the flow to clean up the instance. 
+
     }
 
 
+
+
     @GetMapping("/")
-    public int getQueueSize() {
-        return queue.size();
+    public List<QueueSession> getQueuedSessions() {
+        return queue;
     }
 
     @GetMapping("/{id}")
