@@ -9,7 +9,7 @@ spec:
     attributes:
       type: Queue.CustomerJoined
   subscriber:
-    uri: http://queue-service/join/
+    uri: http://queue-service.default.svc.cluster.local/join/
 
 ---
 apiVersion: eventing.knative.dev/v1
@@ -23,4 +23,4 @@ spec:
     attributes:
       type: Queue.CustomerAbandoned
   subscriber:
-    uri: http://queue-service/abandon/
+    uri: http://queue-service.default.svc.cluster.local/abandon/

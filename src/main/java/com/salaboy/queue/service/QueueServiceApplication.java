@@ -39,12 +39,14 @@ public class QueueServiceApplication {
         SpringApplication.run(QueueServiceApplication.class, args);
     }
 
-    @Value("${ZEEBE_CLOUD_EVENTS_ROUTER:http://zeebe-cloud-events-router}")
-    private String ZEEBE_CLOUD_EVENTS_ROUTER;
+//    @Value("${ZEEBE_CLOUD_EVENTS_ROUTER:http://zeebe-cloud-events-router}")
+//    private String ZEEBE_CLOUD_EVENTS_ROUTER;
+//
+//    @Value("${FRONT_END:http://customer-waiting-room-app.default.svc.cluster.local}")
+//    private String FRONT_END;
 
-    @Value("${FRONT_END:http://customer-waiting-room-app.default.svc.cluster.local}")
-    private String FRONT_END;
-
+    @Value("${K_SINK:http://broker-ingress.knative-eventing.svc.cluster.local/default/default}")
+    private String K_SINK;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -66,7 +68,7 @@ public class QueueServiceApplication {
                             e.printStackTrace();
                         }
                         log.info("Data going into the Cloud Event Builder ");
-                        CloudEventBuilder cloudEventBuilder = CloudEventBuilder.v03()
+                        CloudEventBuilder cloudEventBuilder = CloudEventBuilder.v1()
                                 .withId(UUID.randomUUID().toString())
                                 .withTime(ZonedDateTime.now())
                                 .withType("Queue.CustomerExited")
@@ -84,20 +86,20 @@ public class QueueServiceApplication {
 
 
                         logCloudEvent(zeebeCloudEvent);
-                        WebClient webClient = WebClient.builder().baseUrl(ZEEBE_CLOUD_EVENTS_ROUTER).filter(logRequest()).build();
+                        WebClient webClient = WebClient.builder().baseUrl(K_SINK).filter(logRequest()).build();
 
-                        WebClient.ResponseSpec postCloudEvent = CloudEventsHelper.createPostCloudEvent(webClient, "/message", zeebeCloudEvent);
-
-                        postCloudEvent.bodyToMono(String.class).doOnError(t -> t.printStackTrace())
-                                .doOnSuccess(s -> System.out.println("Result -> " + s)).subscribe();
-
-
-                        webClient = WebClient.builder().baseUrl(FRONT_END).filter(logRequest()).build();
-
-                        postCloudEvent = CloudEventsHelper.createPostCloudEvent(webClient, "/api/", zeebeCloudEvent);
+                        WebClient.ResponseSpec postCloudEvent = CloudEventsHelper.createPostCloudEvent(webClient, zeebeCloudEvent);
 
                         postCloudEvent.bodyToMono(String.class).doOnError(t -> t.printStackTrace())
                                 .doOnSuccess(s -> System.out.println("Result -> " + s)).subscribe();
+
+//
+//                        webClient = WebClient.builder().baseUrl(FRONT_END).filter(logRequest()).build();
+//
+//                        postCloudEvent = CloudEventsHelper.createPostCloudEvent(webClient, "/api/", zeebeCloudEvent);
+//
+//                        postCloudEvent.bodyToMono(String.class).doOnError(t -> t.printStackTrace())
+//                                .doOnSuccess(s -> System.out.println("Result -> " + s)).subscribe();
 
 
                         log.info("Queue Size: " + queue.size());
