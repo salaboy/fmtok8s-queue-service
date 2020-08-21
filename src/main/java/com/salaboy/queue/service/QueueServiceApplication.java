@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URI;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -70,7 +71,7 @@ public class QueueServiceApplication {
                         log.info("Data going into the Cloud Event Builder ");
                         CloudEventBuilder cloudEventBuilder = CloudEventBuilder.v1()
                                 .withId(UUID.randomUUID().toString())
-                                .withTime(ZonedDateTime.now())
+                                .withTime(OffsetDateTime.now().toZonedDateTime()) // bug-> https://github.com/cloudevents/sdk-java/issues/200
                                 .withType("Queue.CustomerExited")
                                 .withSource(URI.create("queue-service.default.svc.cluster.local"))
                                 .withData(data.getBytes())
