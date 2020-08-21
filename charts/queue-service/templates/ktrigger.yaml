@@ -1,0 +1,26 @@
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: queue-join-trigger
+  namespace: default
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: Queue.CustomerJoined
+  subscriber:
+    uri: http://queue-service/join/
+
+---
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: queue-abandon-trigger
+  namespace: default
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: Queue.CustomerAbandoned
+  subscriber:
+    uri: http://queue-service/abandon/
