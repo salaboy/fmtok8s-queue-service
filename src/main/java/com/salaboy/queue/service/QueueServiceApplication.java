@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -25,7 +24,6 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URI;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,11 +38,6 @@ public class QueueServiceApplication {
         SpringApplication.run(QueueServiceApplication.class, args);
     }
 
-//    @Value("${ZEEBE_CLOUD_EVENTS_ROUTER:http://zeebe-cloud-events-router}")
-//    private String ZEEBE_CLOUD_EVENTS_ROUTER;
-//
-//    @Value("${FRONT_END:http://customer-waiting-room-app.default.svc.cluster.local}")
-//    private String FRONT_END;
 
     @Value("${K_SINK:http://broker-ingress.knative-eventing.svc.cluster.local/default/default}")
     private String K_SINK;
@@ -94,13 +87,6 @@ public class QueueServiceApplication {
                         postCloudEvent.bodyToMono(String.class).doOnError(t -> t.printStackTrace())
                                 .doOnSuccess(s -> System.out.println("Result -> " + s)).subscribe();
 
-//
-//                        webClient = WebClient.builder().baseUrl(FRONT_END).filter(logRequest()).build();
-//
-//                        postCloudEvent = CloudEventsHelper.createPostCloudEvent(webClient, "/api/", zeebeCloudEvent);
-//
-//                        postCloudEvent.bodyToMono(String.class).doOnError(t -> t.printStackTrace())
-//                                .doOnSuccess(s -> System.out.println("Result -> " + s)).subscribe();
 
 
                         log.info("Queue Size: " + queue.size());
