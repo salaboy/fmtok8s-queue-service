@@ -3,13 +3,12 @@ package com.salaboy.queue.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.salaboy.cloudevents.helper.CloudEventsHelper;
 import io.cloudevents.CloudEvent;
 import io.cloudevents.core.builder.CloudEventBuilder;
 import io.cloudevents.core.format.EventFormat;
 import io.cloudevents.core.provider.EventFormatProvider;
 import io.cloudevents.jackson.JsonFormat;
-import io.zeebe.cloudevents.ZeebeCloudEventsHelper;
+import io.cloudevents.spring.http.CloudEventHttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -23,7 +22,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URI;
-import java.time.OffsetDateTime;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +35,6 @@ public class QueueServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(QueueServiceApplication.class, args);
     }
-
 
     @Value("${K_SINK:http://broker-ingress.knative-eventing.svc.cluster.local/default/default}")
     private String K_SINK;
@@ -64,30 +61,23 @@ public class QueueServiceApplication {
                         log.info("Data going into the Cloud Event Builder ");
                         CloudEventBuilder cloudEventBuilder = CloudEventBuilder.v1()
                                 .withId(UUID.randomUUID().toString())
-                                .withTime(OffsetDateTime.now().toZonedDateTime()) // bug-> https://github.com/cloudevents/sdk-java/issues/200
                                 .withType("Queue.CustomerExited")
                                 .withSource(URI.create("queue-service.default.svc.cluster.local"))
-                                .withData(data.getBytes())
+                                .withExtension("correlationkey", session.getSessionId())
                                 .withDataContentType("application/json")
                                 .withSubject(session.getSessionId());
 
 
+                        CloudEvent cloudEvent = cloudEventBuilder.build();
+                        logCloudEvent(cloudEvent);
 
-                        CloudEvent zeebeCloudEvent = ZeebeCloudEventsHelper
-                                .buildZeebeCloudEvent(cloudEventBuilder)
-                                .withCorrelationKey(session.getSessionId()).build();
+                        HttpHeaders outgoing = CloudEventHttpUtils.toHttp(cloudEvent);
 
 
-
-                        logCloudEvent(zeebeCloudEvent);
                         WebClient webClient = WebClient.builder().baseUrl(K_SINK).filter(logRequest()).build();
 
-                        WebClient.ResponseSpec postCloudEvent = CloudEventsHelper.createPostCloudEvent(webClient, zeebeCloudEvent);
-
-                        postCloudEvent.bodyToMono(String.class).doOnError(t -> t.printStackTrace())
-                                .doOnSuccess(s -> System.out.println("Result -> " + s)).subscribe();
-
-
+                        webClient.post().headers(httpHeaders -> outgoing.toSingleValueMap()).bodyValue(data).retrieve().bodyToMono(String.class).doOnError(t -> t.printStackTrace())
+                                .doOnSuccess(s -> log.info("Result -> " + s)).subscribe();
 
                         log.info("Queue Size: " + queue.size());
                     } else {
@@ -112,7 +102,6 @@ public class QueueServiceApplication {
 
     }
 
-
     private static ExchangeFilterFunction logRequest() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
             log.info("Request: " + clientRequest.method() + " - " + clientRequest.url());
@@ -122,13 +111,12 @@ public class QueueServiceApplication {
     }
 
     @PostMapping(value = "/join")
-    public String joinQueueForTicket(@RequestHeader HttpHeaders headers, @RequestBody Object event) throws IOException {
-        CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
+    public String joinQueueForTicket(@RequestHeader HttpHeaders headers, @RequestBody QueueSession session) throws IOException {
+        CloudEvent cloudEvent = CloudEventHttpUtils.fromHttp(headers).build();
         logCloudEvent(cloudEvent);
         if (!cloudEvent.getType().equals("Queue.CustomerJoined")) {
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getType());
         }
-        QueueSession session = objectMapper.readValue(new String(cloudEvent.getData()), QueueSession.class);
 
         if (!alreadyInQueue(session.getSessionId())) {
             log.info("> New Customer in Queue: " + session);
@@ -138,17 +126,14 @@ public class QueueServiceApplication {
         return session.toString();
     }
 
-
-
     @PostMapping(value = "/abandon")
-    public void abandonQueue(@RequestHeader HttpHeaders headers, @RequestBody Object event) throws JsonProcessingException {
-        CloudEvent cloudEvent = ZeebeCloudEventsHelper.parseZeebeCloudEventFromRequest(headers, event);
+    public void abandonQueue(@RequestHeader HttpHeaders headers, @RequestBody QueueSession session) throws JsonProcessingException {
+        CloudEvent cloudEvent = CloudEventHttpUtils.fromHttp(headers).build();
         logCloudEvent(cloudEvent);
         if (!cloudEvent.getType().equals("Queue.CustomerAbandoned")) {
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Queue.CustomerAbandoned' and got: " + cloudEvent.getType());
         }
-        log.info("> Customer abandoned the Queue: " + event);
-        QueueSession session = objectMapper.readValue(new String(cloudEvent.getData()), QueueSession.class);
+        log.info("> Customer abandoned the Queue: " + session);
         if(session != null && queue.contains(session)) {
             queue.remove(session);
             log.info("Session Removed: " + session.getSessionId());
@@ -157,9 +142,6 @@ public class QueueServiceApplication {
         }
 
     }
-
-
-
 
     @GetMapping("/")
     public List<QueueSession> getQueuedSessions() {
@@ -190,6 +172,5 @@ public class QueueServiceApplication {
         return false;
 
     }
-
 
 }
