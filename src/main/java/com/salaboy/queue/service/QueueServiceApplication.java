@@ -76,7 +76,9 @@ public class QueueServiceApplication {
 
                         WebClient webClient = WebClient.builder().baseUrl(K_SINK).filter(logRequest()).build();
 
-                        webClient.post().headers(httpHeaders -> outgoing.toSingleValueMap()).bodyValue(data).retrieve().bodyToMono(String.class).doOnError(t -> t.printStackTrace())
+                        webClient.post().headers(httpHeaders -> httpHeaders.putAll(outgoing)).bodyValue(data).retrieve()
+                                .bodyToMono(String.class)
+                                .doOnError(t -> t.printStackTrace())
                                 .doOnSuccess(s -> log.info("Result -> " + s)).subscribe();
 
                         log.info("Queue Size: " + queue.size());
