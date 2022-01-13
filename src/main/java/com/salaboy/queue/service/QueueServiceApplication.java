@@ -2,18 +2,23 @@ package com.salaboy.queue.service;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudevents.CloudEvent;
 import io.cloudevents.core.builder.CloudEventBuilder;
 import io.cloudevents.core.format.EventFormat;
 import io.cloudevents.core.provider.EventFormatProvider;
 import io.cloudevents.jackson.JsonFormat;
 import io.cloudevents.spring.http.CloudEventHttpUtils;
+import io.cloudevents.spring.webflux.CloudEventHttpMessageReader;
+import io.cloudevents.spring.webflux.CloudEventHttpMessageWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.codec.CodecCustomizer;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -39,7 +44,6 @@ public class QueueServiceApplication {
     @Value("${K_SINK:http://broker-ingress.knative-eventing.svc.cluster.local/default/default}")
     private String K_SINK;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     private LinkedList<QueueSession> queue = new LinkedList<>();
 
@@ -52,31 +56,20 @@ public class QueueServiceApplication {
                     if (!queue.isEmpty()) {
                         QueueSession session = queue.pop();
                         log.info("You are next: " + session);
-                        String data = "";
-                        try {
-                            data = objectMapper.writeValueAsString("{ \"sessionId\" : \"" + session.getSessionId() + "\" }");
-                        } catch (JsonProcessingException e) {
-                            e.printStackTrace();
-                        }
-                        log.info("Data going into the Cloud Event Builder ");
                         CloudEventBuilder cloudEventBuilder = CloudEventBuilder.v1()
                                 .withId(UUID.randomUUID().toString())
                                 .withType("Queue.CustomerExited")
                                 .withSource(URI.create("queue-service.default.svc.cluster.local"))
-                                .withExtension("correlationkey", session.getSessionId())
-                                .withDataContentType("application/json")
-                                .withSubject(session.getSessionId());
-
+                                .withDataContentType("application/json; charset=UTF-8")
+                                .withExtension("correlationkey", session.getSessionId());
 
                         CloudEvent cloudEvent = cloudEventBuilder.build();
                         logCloudEvent(cloudEvent);
 
                         HttpHeaders outgoing = CloudEventHttpUtils.toHttp(cloudEvent);
 
-
                         WebClient webClient = WebClient.builder().baseUrl(K_SINK).filter(logRequest()).build();
-
-                        webClient.post().headers(httpHeaders -> httpHeaders.putAll(outgoing)).bodyValue(data).retrieve()
+                        webClient.post().headers(httpHeaders -> httpHeaders.putAll(outgoing)).bodyValue(session).retrieve()
                                 .bodyToMono(String.class)
                                 .doOnError(t -> t.printStackTrace())
                                 .doOnSuccess(s -> log.info("Result -> " + s)).subscribe();
@@ -113,19 +106,20 @@ public class QueueServiceApplication {
     }
 
     @PostMapping(value = "/join")
-    public String joinQueueForTicket(@RequestHeader HttpHeaders headers, @RequestBody QueueSession session) throws IOException {
+    public ResponseEntity<Void> joinQueueForTicket(@RequestHeader HttpHeaders headers, @RequestBody QueueSession session) throws IOException {
         CloudEvent cloudEvent = CloudEventHttpUtils.fromHttp(headers).build();
         logCloudEvent(cloudEvent);
         if (!cloudEvent.getType().equals("Queue.CustomerJoined")) {
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Tickets.CustomerQueueJoined' and got: " + cloudEvent.getType());
         }
-
+        String correlationkey = (String) cloudEvent.getExtension("correlationkey");
+        log.info("Correlation Key from Cloud Event Extension: " + correlationkey);
         if (!alreadyInQueue(session.getSessionId())) {
             log.info("> New Customer in Queue: " + session);
 
             queue.add(session);
         }
-        return session.toString();
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/abandon")
@@ -136,11 +130,11 @@ public class QueueServiceApplication {
             throw new IllegalStateException("Wrong Cloud Event Type, expected: 'Queue.CustomerAbandoned' and got: " + cloudEvent.getType());
         }
         log.info("> Customer abandoned the Queue: " + session);
-        if(session != null && queue.contains(session)) {
+        if (session != null && queue.contains(session)) {
             queue.remove(session);
             log.info("Session Removed: " + session.getSessionId());
-        }else{
-            log.info("Session not removed: " +session);
+        } else {
+            log.info("Session not removed: " + session);
         }
 
     }
@@ -172,6 +166,17 @@ public class QueueServiceApplication {
             }
         }
         return false;
+
+    }
+
+    @Configuration
+    public static class CloudEventHandlerConfiguration implements CodecCustomizer {
+
+        @Override
+        public void customize(CodecConfigurer configurer) {
+            configurer.customCodecs().register(new CloudEventHttpMessageReader());
+            configurer.customCodecs().register(new CloudEventHttpMessageWriter());
+        }
 
     }
 
